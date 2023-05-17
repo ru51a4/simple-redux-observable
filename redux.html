@@ -17,23 +17,21 @@
 <script type="text/babel">
 
     class myRedux {
-        static init;
-        subscribe = [];
-        constructor() {
-            if (!myRedux.init) {
-                myRedux.init = this;
-            }
-            return myRedux.init;
+        listners = [];
+        reducer = {};
+        state = {};
+        constructor(reducer, initState) {
+            this.state = initState;
+            this.reducer = reducer;
         }
-        state = { count: 0 };
-        dispatch = (reducer, action) => {
-            this.state = reducer(this.state, action)
-            this.subscribe.forEach((item) => {
-                item(this.state);
+        dispatch = (action) => {
+            this.state = this.reducer(this.state, action)
+            this.listners.forEach((cb) => {
+                cb(this.state);
             });
         }
-        sub = (cb) => {
-            this.subscribe.push(cb);
+        subscribe = (cb) => {
+            this.listners.push(cb);
         }
     }
     //reducer 
@@ -57,7 +55,7 @@
     let actionIncrement = "increment";
     let actionDecrement = "decrement";
     //
-    let store = new myRedux();
+    let store = new myRedux(reducer, { count: 0 });
 
     class App extends React.Component {
         constructor() {
@@ -68,15 +66,15 @@
         };
 
         componentDidMount = () => {
-            store.sub(() => {
+            store.subscribe(() => {
                 this.setState({ counter: store.state.count });
             });
         }
         increment = () => {
-            store.dispatch(reducer, actionIncrement);
+            store.dispatch(actionIncrement);
         }
         decrement = () => {
-            store.dispatch(reducer, actionDecrement);
+            store.dispatch(actionDecrement);
         }
 
 
