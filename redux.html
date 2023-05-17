@@ -1,0 +1,100 @@
+<html>
+
+<head>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.6.3/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.6.3/umd/react-dom.production.min.js"></script>
+
+</head>
+
+<body>
+    <div id="app">
+
+    </div>
+</body>
+
+
+<script type="text/babel">
+
+    class myRedux {
+        static init;
+        subscribe = [];
+        constructor() {
+            if (!myRedux.init) {
+                myRedux.init = this;
+            }
+            return myRedux.init;
+        }
+        state = { count: 0 };
+        dispatch = (reducer, action) => {
+            this.state = reducer(this.state, action)
+            this.subscribe.forEach((item) => {
+                item(this.state);
+            });
+        }
+        sub = (cb) => {
+            this.subscribe.push(cb);
+        }
+    }
+    //reducer 
+    let reducer = (state, action) => {
+        switch (action) {
+            case "increment":
+                return {
+                    ...state,
+                    count: state.count + 1,
+                }
+            case "decrement":
+                return {
+                    ...state,
+                    count: state.count - 1,
+                }
+        }
+    }
+
+    //
+    //action
+    let actionIncrement = "increment";
+    let actionDecrement = "decrement";
+    //
+    let store = new myRedux();
+
+    class App extends React.Component {
+        constructor() {
+            super();
+        }
+        state = {
+            counter: 0,
+        };
+
+        componentDidMount = () => {
+            store.sub(() => {
+                this.setState({ counter: store.state.count });
+            });
+        }
+        increment = () => {
+            store.dispatch(reducer, actionIncrement);
+        }
+        decrement = () => {
+            store.dispatch(reducer, actionDecrement);
+        }
+
+
+        render = () => {
+            return (
+                <div className="app-content">
+                    <h1>{store.state.count}</h1>
+                    <button onClick={this.increment}>+</button>
+                    <button onClick={this.decrement}>-</button>
+                </div>
+            )
+        }
+    }
+
+    ReactDOM.render(<App />, document.getElementById('app'));
+
+
+
+</script>
+
+</html>
